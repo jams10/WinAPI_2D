@@ -1,8 +1,9 @@
-﻿// Assortrock_WINAPI_2018.cpp : Defines the entry point for the application.
+﻿// AssortrockWINAPI.cpp : Defines the entry point for the application.
 //
 
+#include "pch.h"
 #include "framework.h"
-#include "Assortrock_WINAPI_2018.h"
+#include "AssortrockWINAPI.h"
 
 #define MAX_LOADSTRING 100
 
@@ -29,7 +30,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_ASSORTROCKWINAPI2018, szWindowClass, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDC_ASSORTROCKWINAPI, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
@@ -38,7 +39,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ASSORTROCKWINAPI2018));
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ASSORTROCKWINAPI));
 
     MSG msg;
 
@@ -73,10 +74,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ASSORTROCKWINAPI2018));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ASSORTROCKWINAPI));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_ASSORTROCKWINAPI2018);
+    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_ASSORTROCKWINAPI);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 

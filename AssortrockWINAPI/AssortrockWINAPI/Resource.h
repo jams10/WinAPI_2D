@@ -1,17 +1,17 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Assortrock_WINAPI_2018.rc
+// Used by AssortrockWINAPI.rc
 
 #define IDS_APP_TITLE			103
 
 #define IDR_MAINFRAME			128
-#define IDD_ASSORTROCKWINAPI2018_DIALOG	102
+#define IDD_ASSORTROCKWINAPI_DIALOG	102
 #define IDD_ABOUTBOX			103
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
-#define IDI_ASSORTROCKWINAPI2018			107
+#define IDI_ASSORTROCKWINAPI			107
 #define IDI_SMALL				108
-#define IDC_ASSORTROCKWINAPI2018			109
+#define IDC_ASSORTROCKWINAPI			109
 #define IDC_MYICON				2
 #ifndef IDC_STATIC
 #define IDC_STATIC				-1
