@@ -18,6 +18,15 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+struct _tagArea
+{
+    bool  bStart;
+    POINT ptStart;
+    POINT ptEnd;
+};
+
+_tagArea g_tArea;
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -77,7 +86,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ASSORTROCKWINAPI));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_ASSORTROCKWINAPI);
+    wcex.lpszMenuName   = NULL; //MAKEINTRESOURCEW(IDC_ASSORTROCKWINAPI);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -148,7 +157,77 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
+
+            TextOut( hdc, 50, 50, TEXT( "한" ), 1 );
+            TextOut( hdc, 65, 65, TEXT( "글" ), 1 );
+            TextOut( hdc, 80, 80, TEXT( "Hangeul" ), 7 );
+            
+            TCHAR strMouse[64] = {};
+            wsprintf( strMouse, TEXT( "Start = x : %d y : %d" ), g_tArea.ptStart.x, g_tArea.ptStart.y );
+            TextOut( hdc, 600, 30, strMouse, lstrlen( strMouse ) );
+
+            Rectangle( hdc, 100, 100, 200, 200 );
+
+            Ellipse( hdc, 100, 100, 200, 200 );
+
+            // 라인의 시작점을 정의.
+            MoveToEx( hdc, 300, 100, NULL );
+            // 끝 점을 정의
+            LineTo( hdc, 600, 600 );
+            LineTo( hdc, 800, 100 );
+
+            MoveToEx( hdc, 100, 400, NULL );
+            LineTo( hdc, 150, 800 );
+
+            if( g_tArea.bStart )
+            {
+                Rectangle( hdc, g_tArea.ptStart.x, g_tArea.ptStart.y, g_tArea.ptEnd.x, g_tArea.ptEnd.y );
+            }
+
             EndPaint(hWnd, &ps);
+        }
+        break;
+    // 마우스 왼쪽이 눌렸을 때 들어오는 메시지.
+    case WM_LBUTTONDOWN:
+        if( !g_tArea.bStart )
+        {
+            g_tArea.bStart = true;
+            g_tArea.ptStart.x = lParam & 0x0000ffff;
+            g_tArea.ptStart.y = lParam >> 16;
+            g_tArea.ptEnd = g_tArea.ptStart;
+
+            InvalidateRect( hWnd, NULL, TRUE );
+        }
+        break;
+    // 마우스가 움직일때 들어오는 메시지.
+    case WM_MOUSEMOVE:
+        if( g_tArea.bStart )
+        {
+            g_tArea.ptEnd.x = lParam & 0x0000ffff;
+            g_tArea.ptEnd.y = lParam >> 16;
+
+            InvalidateRect( hWnd, NULL, TRUE );
+        }
+        break;
+    // 마우스 왼쪽 버튼을 누르다가 뗐을 때 발생하는 메시지.
+    case WM_LBUTTONUP:
+        if( g_tArea.bStart )
+        {
+            g_tArea.bStart = false;
+            g_tArea.ptEnd.x = lParam & 0x0000ffff;
+            g_tArea.ptEnd.y = lParam >> 16;
+
+            InvalidateRect( hWnd, NULL, TRUE );
+        }
+        break;
+    // 키가 눌렸을 때 들어오는 메시지.
+    case WM_KEYDOWN:
+        // 이 메시지가 들어올 경우 wParam에 어떤 키가 눌렸는지가 들어옴.
+        switch( wParam )
+        {
+        case VK_ESCAPE:
+            DestroyWindow( hWnd );
+            break;
         }
         break;
     case WM_DESTROY:
