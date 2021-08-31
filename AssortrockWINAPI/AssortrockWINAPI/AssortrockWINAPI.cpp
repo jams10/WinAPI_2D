@@ -12,20 +12,18 @@ HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
+HWND g_hWnd;
+HDC  g_hDC;
+bool g_bLoop = true;
+RECT g_tPlayerRC = { 100, 100, 200, 200 };
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-struct _tagArea
-{
-    bool  bStart;
-    POINT ptStart;
-    POINT ptEnd;
-};
-
-_tagArea g_tArea;
+void Run();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -48,19 +46,37 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
+    // 화면 그리기용 DC 생성.
+    g_hDC = GetDC( g_hWnd );
+
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ASSORTROCKWINAPI));
 
     MSG msg;
 
     // Main message loop:
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while( g_bLoop )
     {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        if ( PeekMessage( &msg, nullptr, 0, 0, PM_REMOVE ) )
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
+        // 윈도우 데드 타임일 경우
+        else
+        {
+            static int iCount;
+            ++iCount;
+
+            if( iCount == 5000 )
+            {
+                iCount = 0;
+                Run();
+            }
+        }
     }
+
+    ReleaseDC( g_hWnd, g_hDC );
 
     return (int) msg.wParam;
 }
@@ -114,6 +130,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    {
       return FALSE;
    }
+   // 윈도우 핸들 전역변수에 생성한 윈도우 핸들 넣기.
+   g_hWnd = hWnd;
+
+   // 실제 윈도우 타이틀바나 메뉴를 포함한 윈도우 크기를 구해줌.
+   RECT rc = { 0,0,800,600 };
+   AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
+
+   // 위에서 구해준 전체 윈도우 크기를 통해 클라이언트 영역의 크기를 원하는 크기로 맞춰줘야 함.
+   SetWindowPos( hWnd, HWND_TOPMOST, 100, 100, rc.right - rc.left, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER );
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -158,79 +183,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
 
-            TextOut( hdc, 50, 50, TEXT( "한" ), 1 );
-            TextOut( hdc, 65, 65, TEXT( "글" ), 1 );
-            TextOut( hdc, 80, 80, TEXT( "Hangeul" ), 7 );
-            
-            TCHAR strMouse[64] = {};
-            wsprintf( strMouse, TEXT( "Start = x : %d y : %d" ), g_tArea.ptStart.x, g_tArea.ptStart.y );
-            TextOut( hdc, 600, 30, strMouse, lstrlen( strMouse ) );
-
-            Rectangle( hdc, 100, 100, 200, 200 );
-
-            Ellipse( hdc, 100, 100, 200, 200 );
-
-            // 라인의 시작점을 정의.
-            MoveToEx( hdc, 300, 100, NULL );
-            // 끝 점을 정의
-            LineTo( hdc, 600, 600 );
-            LineTo( hdc, 800, 100 );
-
-            MoveToEx( hdc, 100, 400, NULL );
-            LineTo( hdc, 150, 800 );
-
-            if( g_tArea.bStart )
-            {
-                Rectangle( hdc, g_tArea.ptStart.x, g_tArea.ptStart.y, g_tArea.ptEnd.x, g_tArea.ptEnd.y );
-            }
-
             EndPaint(hWnd, &ps);
         }
         break;
-    // 마우스 왼쪽이 눌렸을 때 들어오는 메시지.
-    case WM_LBUTTONDOWN:
-        if( !g_tArea.bStart )
-        {
-            g_tArea.bStart = true;
-            g_tArea.ptStart.x = lParam & 0x0000ffff;
-            g_tArea.ptStart.y = lParam >> 16;
-            g_tArea.ptEnd = g_tArea.ptStart;
-
-            InvalidateRect( hWnd, NULL, TRUE );
-        }
-        break;
-    // 마우스가 움직일때 들어오는 메시지.
-    case WM_MOUSEMOVE:
-        if( g_tArea.bStart )
-        {
-            g_tArea.ptEnd.x = lParam & 0x0000ffff;
-            g_tArea.ptEnd.y = lParam >> 16;
-
-            InvalidateRect( hWnd, NULL, TRUE );
-        }
-        break;
-    // 마우스 왼쪽 버튼을 누르다가 뗐을 때 발생하는 메시지.
-    case WM_LBUTTONUP:
-        if( g_tArea.bStart )
-        {
-            g_tArea.bStart = false;
-            g_tArea.ptEnd.x = lParam & 0x0000ffff;
-            g_tArea.ptEnd.y = lParam >> 16;
-
-            InvalidateRect( hWnd, NULL, TRUE );
-        }
-        break;
-    // 키가 눌렸을 때 들어오는 메시지.
-    case WM_KEYDOWN:
-        // 이 메시지가 들어올 경우 wParam에 어떤 키가 눌렸는지가 들어옴.
-        switch( wParam )
-        {
-        case VK_ESCAPE:
-            DestroyWindow( hWnd );
-            break;
-        }
-        break;
+        // 윈도우를 종료시킬 때 들어오는 메시지.
     case WM_DESTROY:
+        g_bLoop = false;
         PostQuitMessage(0);
         break;
     default:
@@ -257,4 +215,53 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+void Run()
+{
+    RECT wndRect;
+    GetClientRect( g_hWnd, &wndRect );
+
+    if( GetAsyncKeyState( 'D' ) & 0x8000 )
+    {
+        g_tPlayerRC.left += 1;
+        g_tPlayerRC.right += 1;
+        if( g_tPlayerRC.right > wndRect.right )
+        {
+            g_tPlayerRC.right = wndRect.right;
+            g_tPlayerRC.left = wndRect.right - 100;
+        }
+    }
+    if( GetAsyncKeyState( 'A' ) & 0x8000 )
+    {
+        g_tPlayerRC.left -= 1;
+        g_tPlayerRC.right -= 1;
+        if( g_tPlayerRC.left < wndRect.left )
+        {
+            g_tPlayerRC.left = 0;
+            g_tPlayerRC.right = wndRect.left + 100;
+        }
+    }
+    if( GetAsyncKeyState( 'W' ) & 0x8000 )
+    {
+        g_tPlayerRC.top -= 1;
+        g_tPlayerRC.bottom -= 1;
+        if( g_tPlayerRC.top < wndRect.top )
+        {
+            g_tPlayerRC.top = wndRect.top;
+            g_tPlayerRC.bottom = wndRect.top + 100;
+        }
+    }
+    if( GetAsyncKeyState( 'S' ) & 0x8000 )
+    {
+        g_tPlayerRC.top += 1;
+        g_tPlayerRC.bottom += 1;
+        if( g_tPlayerRC.bottom > wndRect.bottom )
+        {
+            g_tPlayerRC.bottom = wndRect.bottom;
+            g_tPlayerRC.top = wndRect.bottom - 100;
+        }
+    }
+
+    Rectangle( g_hDC, g_tPlayerRC.left, g_tPlayerRC.top, g_tPlayerRC.right, g_tPlayerRC.bottom );
 }
