@@ -7,6 +7,11 @@
 
 #define MAX_LOADSTRING 100
 
+typedef struct _tagRectangle
+{
+    float l, t, r, b;
+}RECTANGLE, *PRECTANGLE;
+
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -15,7 +20,12 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND g_hWnd;
 HDC  g_hDC;
 bool g_bLoop = true;
-RECT g_tPlayerRC = { 100, 100, 200, 200 };
+RECTANGLE g_tPlayerRC = { 100, 100, 200, 200 };
+
+// 시간을 구하기 위한 변수들
+LARGE_INTEGER g_tSecond;
+LARGE_INTEGER g_tTime;
+float         g_fDeltaTime;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -53,6 +63,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
+    QueryPerformanceFrequency( &g_tSecond );
+    // 이전 Tick(초기 Tick)
+    QueryPerformanceCounter( &g_tTime );
+
     // Main message loop:
     while( g_bLoop )
     {
@@ -65,14 +79,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         // 윈도우 데드 타임일 경우
         else
         {
-            static int iCount;
-            ++iCount;
-
-            if( iCount == 5000 )
-            {
-                iCount = 0;
-                Run();
-            }
+            Run();
         }
     }
 
@@ -219,49 +226,83 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 void Run()
 {
-    RECT wndRect;
-    GetClientRect( g_hWnd, &wndRect );
+    // DeltaTime
+    LARGE_INTEGER tTime;
+    // 현재 프레임의 틱을 뽑아옴.
+    QueryPerformanceCounter( &tTime );
+
+    // (현재 Tick - 이전 Tick) / 초당 Tick
+    g_fDeltaTime = static_cast<float> ((tTime.QuadPart - g_tTime.QuadPart)) / g_tSecond.QuadPart;
+
+    g_tTime = tTime;
+
+    // 슬로우 모션 ( 타임 스케일 이용 )
+    static float fTimeScale = 1.f;
+
+    if( GetAsyncKeyState( VK_F1 ) & 0x8000 )
+    {
+        fTimeScale -= g_fDeltaTime;
+        if( fTimeScale < 0.f )
+        {
+            fTimeScale = 0.f;
+        }
+    }
+
+    if( GetAsyncKeyState( VK_F2 ) & 0x8000 )
+    {
+        fTimeScale += g_fDeltaTime;
+        if( fTimeScale > 1.f )
+        {
+            fTimeScale = 1.f;
+        }
+    }
+
+    // 플레이어 초당 이동속도 : 300에 30%만큼 더 빠르게 움직임.(아이템 먹었을 때 이동 속도 퍼센트 단위로 올리기)
+    float fSpeed = (300 + 300 * 0.3f) * g_fDeltaTime * fTimeScale;
+
+    RECT clientRect;
+    GetClientRect( g_hWnd, &clientRect );
 
     if( GetAsyncKeyState( 'D' ) & 0x8000 )
     {
-        g_tPlayerRC.left += 1;
-        g_tPlayerRC.right += 1;
-        if( g_tPlayerRC.right > wndRect.right )
+        g_tPlayerRC.l += fSpeed;
+        g_tPlayerRC.r += fSpeed;
+        if( g_tPlayerRC.r > clientRect.right )
         {
-            g_tPlayerRC.right = wndRect.right;
-            g_tPlayerRC.left = wndRect.right - 100;
+            g_tPlayerRC.r = clientRect.right;
+            g_tPlayerRC.l = clientRect.right - 100;
         }
     }
     if( GetAsyncKeyState( 'A' ) & 0x8000 )
     {
-        g_tPlayerRC.left -= 1;
-        g_tPlayerRC.right -= 1;
-        if( g_tPlayerRC.left < wndRect.left )
+        g_tPlayerRC.l -= fSpeed;
+        g_tPlayerRC.r -= fSpeed;
+        if( g_tPlayerRC.l < clientRect.left )
         {
-            g_tPlayerRC.left = 0;
-            g_tPlayerRC.right = wndRect.left + 100;
+            g_tPlayerRC.l = 0;
+            g_tPlayerRC.r = clientRect.left + 100;
         }
     }
     if( GetAsyncKeyState( 'W' ) & 0x8000 )
     {
-        g_tPlayerRC.top -= 1;
-        g_tPlayerRC.bottom -= 1;
-        if( g_tPlayerRC.top < wndRect.top )
+        g_tPlayerRC.t -= fSpeed;
+        g_tPlayerRC.b -= fSpeed;
+        if( g_tPlayerRC.t < clientRect.top )
         {
-            g_tPlayerRC.top = wndRect.top;
-            g_tPlayerRC.bottom = wndRect.top + 100;
+            g_tPlayerRC.t = clientRect.top;
+            g_tPlayerRC.b = clientRect.top + 100;
         }
     }
     if( GetAsyncKeyState( 'S' ) & 0x8000 )
     {
-        g_tPlayerRC.top += 1;
-        g_tPlayerRC.bottom += 1;
-        if( g_tPlayerRC.bottom > wndRect.bottom )
+        g_tPlayerRC.t += fSpeed;
+        g_tPlayerRC.b += fSpeed;
+        if( g_tPlayerRC.b > clientRect.bottom )
         {
-            g_tPlayerRC.bottom = wndRect.bottom;
-            g_tPlayerRC.top = wndRect.bottom - 100;
+            g_tPlayerRC.b = clientRect.bottom;
+            g_tPlayerRC.t = clientRect.bottom - 100;
         }
     }
 
-    Rectangle( g_hDC, g_tPlayerRC.left, g_tPlayerRC.top, g_tPlayerRC.right, g_tPlayerRC.bottom );
+    Rectangle( g_hDC, g_tPlayerRC.l, g_tPlayerRC.t, g_tPlayerRC.r, g_tPlayerRC.b );
 }
