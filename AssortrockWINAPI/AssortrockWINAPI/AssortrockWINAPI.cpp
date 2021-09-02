@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "framework.h"
 #include "AssortrockWINAPI.h"
+#include <list>
 
 #define MAX_LOADSTRING 100
 
@@ -21,6 +22,16 @@ HWND g_hWnd;
 HDC  g_hDC;
 bool g_bLoop = true;
 RECTANGLE g_tPlayerRC = { 100, 100, 200, 200 };
+
+typedef struct _tagBullet
+{
+    RECTANGLE rc;
+    float     fDist;
+    float     fLimitDist;
+}BULLET, *PBULLET;
+
+// 플레이어 총알 리스트
+std::list<BULLET> g_PlayerBulletList;
 
 // 시간을 구하기 위한 변수들
 LARGE_INTEGER g_tSecond;
@@ -239,6 +250,9 @@ void Run()
     // 슬로우 모션 ( 타임 스케일 이용 )
     static float fTimeScale = 1.f;
 
+    // 플레이어 초당 이동속도 : 300에 30%만큼 더 빠르게 움직임.(아이템 먹었을 때 이동 속도 퍼센트 단위로 올리기)
+    float fSpeed = (300 + 300 * 0.3f) * g_fDeltaTime * fTimeScale;
+
     if( GetAsyncKeyState( VK_F1 ) & 0x8000 )
     {
         fTimeScale -= g_fDeltaTime;
@@ -257,11 +271,11 @@ void Run()
         }
     }
 
-    // 플레이어 초당 이동속도 : 300에 30%만큼 더 빠르게 움직임.(아이템 먹었을 때 이동 속도 퍼센트 단위로 올리기)
-    float fSpeed = (300 + 300 * 0.3f) * g_fDeltaTime * fTimeScale;
-
     RECT clientRect;
     GetClientRect( g_hWnd, &clientRect );
+
+    // 화면 갱신 임시방편으로 쓰기 위해 클라이언트 크기를 일시적으로 조정.
+    SetRect( &clientRect, 0, 0, 800, 600 );
 
     if( GetAsyncKeyState( 'D' ) & 0x8000 )
     {
@@ -304,5 +318,56 @@ void Run()
         }
     }
 
+    if( GetAsyncKeyState( VK_SPACE ) & 0x8000 )
+    {
+        BULLET tBullet = { RECTANGLE{0.0f, 0.0f, 0.0f, 0.0f}, 0.0f, 0.0f };
+
+        tBullet.rc.l = g_tPlayerRC.r;
+        tBullet.rc.r = tBullet.rc.l + 50.f;
+        tBullet.rc.t = (g_tPlayerRC.t + g_tPlayerRC.b) / 2.0f - 25.f;
+        tBullet.rc.b = tBullet.rc.t + 50.f;
+        tBullet.fDist = 0.f;
+        tBullet.fLimitDist = 500.f;
+
+        g_PlayerBulletList.push_back( tBullet );
+    }
+
     Rectangle( g_hDC, g_tPlayerRC.l, g_tPlayerRC.t, g_tPlayerRC.r, g_tPlayerRC.b );
+
+    std::list<BULLET>::iterator iter;
+    std::list<BULLET>::iterator iterEnd = g_PlayerBulletList.end();
+
+    // 총알의 이동속도
+    fSpeed = 600.f * g_fDeltaTime * fTimeScale;
+
+    for( iter = g_PlayerBulletList.begin(); iter != iterEnd; )
+    {
+        iter->rc.l += fSpeed;
+        iter->rc.r += fSpeed;
+
+        iter->fDist += fSpeed;
+
+        if( iter->fDist >= iter->fLimitDist )
+        {
+            iter = g_PlayerBulletList.erase( iter );
+            iterEnd = g_PlayerBulletList.end();
+        }
+
+        else if( iter->rc.l > clientRect.right )
+        {
+            iter = g_PlayerBulletList.erase( iter );
+            iterEnd = g_PlayerBulletList.end();
+        }
+        else
+        {
+            ++iter;
+        }
+    }
+
+    for( iter = g_PlayerBulletList.begin(); iter != iterEnd; ++iter )
+    {
+        Rectangle( g_hDC, iter->rc.l, iter->rc.t, iter->rc.r, iter->rc.b );
+    }
+
+    Rectangle( g_hDC, 0, 0, 800, 600 );
 }
