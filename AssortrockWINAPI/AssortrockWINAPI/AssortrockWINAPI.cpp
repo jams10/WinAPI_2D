@@ -13,6 +13,22 @@ typedef struct _tagRectangle
     float l, t, r, b;
 }RECTANGLE, *PRECTANGLE;
 
+typedef struct _tagBullet
+{
+    RECTANGLE rc;
+    float     fDist;
+    float     fLimitDist;
+}BULLET, * PBULLET;
+
+typedef struct _tagMonster
+{
+    RECTANGLE tRC;
+    float     fSpeed;
+    float     fTime;
+    float     fLimitTime;
+    int       iDir;
+}MONSTER, * PMONSTER;
+
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -21,17 +37,15 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND g_hWnd;
 HDC  g_hDC;
 bool g_bLoop = true;
-RECTANGLE g_tPlayerRC = { 100, 100, 200, 200 };
 
-typedef struct _tagBullet
-{
-    RECTANGLE rc;
-    float     fDist;
-    float     fLimitDist;
-}BULLET, *PBULLET;
+RECTANGLE g_tPlayerRC = { 100, 100, 200, 200 };
+MONSTER g_tMonster;
 
 // 플레이어 총알 리스트
 std::list<BULLET> g_PlayerBulletList;
+
+// 몬스터 총알
+std::list<BULLET> g_MonsterBulletList;
 
 // 시간을 구하기 위한 변수들
 LARGE_INTEGER g_tSecond;
@@ -69,6 +83,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // 화면 그리기용 DC 생성.
     g_hDC = GetDC( g_hWnd );
+
+    // 몬스터 초기화
+    g_tMonster.tRC.l = 800.f - 100.f;
+    g_tMonster.tRC.t = 0.f;
+    g_tMonster.tRC.r = 800.f;
+    g_tMonster.tRC.b = 100.f;
+    g_tMonster.fSpeed = 300.f;
+    g_tMonster.fLimitTime = 1.2f;
+    g_tMonster.iDir = 1;
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ASSORTROCKWINAPI));
 
@@ -247,6 +270,8 @@ void Run()
 
     g_tTime = tTime;
 
+    /* 플레이어 이동 */
+
     // 슬로우 모션 ( 타임 스케일 이용 )
     static float fTimeScale = 1.f;
 
@@ -317,10 +342,10 @@ void Run()
             g_tPlayerRC.t = clientRect.bottom - 100;
         }
     }
-
+    /* 플레이어 총알 생성 */
     if( GetAsyncKeyState( VK_SPACE ) & 0x8000 )
     {
-        BULLET tBullet = { RECTANGLE{0.0f, 0.0f, 0.0f, 0.0f}, 0.0f, 0.0f };
+        BULLET tBullet = {};
 
         tBullet.rc.l = g_tPlayerRC.r;
         tBullet.rc.r = tBullet.rc.l + 50.f;
@@ -331,9 +356,45 @@ void Run()
 
         g_PlayerBulletList.push_back( tBullet );
     }
+ 
+    /* 몬스터 이동 */
+    g_tMonster.tRC.t += g_tMonster.fSpeed * g_fDeltaTime * fTimeScale * g_tMonster.iDir;
+    g_tMonster.tRC.b += g_tMonster.fSpeed * g_fDeltaTime * fTimeScale * g_tMonster.iDir;
 
-    Rectangle( g_hDC, g_tPlayerRC.l, g_tPlayerRC.t, g_tPlayerRC.r, g_tPlayerRC.b );
+    if( g_tMonster.tRC.b >= 600 )
+    {
+        g_tMonster.iDir = -1;
+        g_tMonster.tRC.b = 600;
+        g_tMonster.tRC.t = 500;
+    }
 
+    else if( g_tMonster.tRC.t <= 0 )
+    {
+        g_tMonster.iDir = 1;
+        g_tMonster.tRC.b = 100;
+        g_tMonster.tRC.t = 0;
+    }
+
+    /* 몬스터 총알 생성 */
+    g_tMonster.fTime += g_fDeltaTime * fTimeScale;
+
+    if( g_tMonster.fTime >= g_tMonster.fLimitTime )
+    {
+        g_tMonster.fTime -= g_tMonster.fLimitTime;
+
+        BULLET tBullet = {};
+
+        tBullet.rc.r = g_tMonster.tRC.l;
+        tBullet.rc.l = tBullet.rc.r - 50.f;
+        tBullet.rc.t = (g_tMonster.tRC.t + g_tMonster.tRC.b) / 2.0f - 25.f;
+        tBullet.rc.b = tBullet.rc.t + 50.f;
+        tBullet.fDist = 0.f;
+        tBullet.fLimitDist = 800.f;
+
+        g_MonsterBulletList.push_back( tBullet );
+    }
+
+    /* 플레이어 총알 이동 */
     std::list<BULLET>::iterator iter;
     std::list<BULLET>::iterator iterEnd = g_PlayerBulletList.end();
 
@@ -364,10 +425,63 @@ void Run()
         }
     }
 
+    /* 몬스터 총알 이동 */
+    iterEnd = g_MonsterBulletList.end();
+    for( iter = g_MonsterBulletList.begin(); iter != iterEnd; )
+    {
+        iter->rc.l -= fSpeed;
+        iter->rc.r -= fSpeed;
+
+        iter->fDist += fSpeed;
+
+
+        if( iter->fDist >= iter->fLimitDist )
+        {
+            iter = g_MonsterBulletList.erase( iter );
+            iterEnd = g_MonsterBulletList.end();
+        }
+
+        else if( iter->rc.r <= 0 )
+        {
+            iter = g_MonsterBulletList.erase( iter );
+            iterEnd = g_MonsterBulletList.end();
+        }
+
+        // 충돌 조건
+        else if( g_tPlayerRC.l <= iter->rc.r && iter->rc.l <= g_tPlayerRC.r &&
+            g_tPlayerRC.t <= iter->rc.b && iter->rc.t <= g_tPlayerRC.b )
+        {
+            iter = g_MonsterBulletList.erase( iter );
+            iterEnd = g_MonsterBulletList.end();
+        }
+
+        else
+        {
+            ++iter;
+        }
+    }
+
+    /* 출력 */
+    // 몬스터 출력
+    Rectangle( g_hDC, g_tMonster.tRC.l, g_tMonster.tRC.t, g_tMonster.tRC.r, g_tMonster.tRC.b );
+
+    // 플레이어 출력
+    Rectangle( g_hDC, g_tPlayerRC.l, g_tPlayerRC.t, g_tPlayerRC.r, g_tPlayerRC.b );
+
+    // 플레이어 총알 출력
+    iterEnd = g_PlayerBulletList.end();
     for( iter = g_PlayerBulletList.begin(); iter != iterEnd; ++iter )
     {
         Rectangle( g_hDC, iter->rc.l, iter->rc.t, iter->rc.r, iter->rc.b );
     }
 
-    Rectangle( g_hDC, 0, 0, 800, 600 );
+    // 몬스터 총알 출력
+    iterEnd = g_MonsterBulletList.end();
+    for( iter = g_MonsterBulletList.begin(); iter != iterEnd; ++iter )
+    {
+        Rectangle( g_hDC, iter->rc.l, iter->rc.t, iter->rc.r, iter->rc.b );
+    }
+
+    // 800*600 사각형으로 화면 덮기
+    // Rectangle( g_hDC, 0, 0, 800, 600 );
 }
