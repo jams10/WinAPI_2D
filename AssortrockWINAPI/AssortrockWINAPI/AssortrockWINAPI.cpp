@@ -5,6 +5,7 @@
 #include "framework.h"
 #include "AssortrockWINAPI.h"
 #include <list>
+#include <math.h>
 
 #define MAX_LOADSTRING 100
 
@@ -13,16 +14,22 @@ typedef struct _tagRectangle
     float l, t, r, b;
 }RECTANGLE, *PRECTANGLE;
 
+typedef struct _tagCircle
+{
+    float x, y;
+    float r;
+}CIRCLE, *PCIRCLE;
+
 typedef struct _tagBullet
 {
-    RECTANGLE rc;
+    CIRCLE    circle;
     float     fDist;
     float     fLimitDist;
 }BULLET, * PBULLET;
 
 typedef struct _tagMonster
 {
-    RECTANGLE tRC;
+    CIRCLE    tCircle;
     float     fSpeed;
     float     fTime;
     float     fLimitTime;
@@ -85,10 +92,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     g_hDC = GetDC( g_hWnd );
 
     // 몬스터 초기화
-    g_tMonster.tRC.l = 800.f - 100.f;
-    g_tMonster.tRC.t = 0.f;
-    g_tMonster.tRC.r = 800.f;
-    g_tMonster.tRC.b = 100.f;
+    g_tMonster.tCircle.x = 800.f - 50.f;
+    g_tMonster.tCircle.y = 50.f;
+    g_tMonster.tCircle.r = 50.f;
     g_tMonster.fSpeed = 300.f;
     g_tMonster.fLimitTime = 1.2f;
     g_tMonster.iDir = 1;
@@ -347,10 +353,9 @@ void Run()
     {
         BULLET tBullet = {};
 
-        tBullet.rc.l = g_tPlayerRC.r;
-        tBullet.rc.r = tBullet.rc.l + 50.f;
-        tBullet.rc.t = (g_tPlayerRC.t + g_tPlayerRC.b) / 2.0f - 25.f;
-        tBullet.rc.b = tBullet.rc.t + 50.f;
+        tBullet.circle.r = 25.f;
+        tBullet.circle.x = g_tPlayerRC.r + tBullet.circle.r;
+        tBullet.circle.y = (g_tPlayerRC.t + g_tPlayerRC.b) / 2.0f;;
         tBullet.fDist = 0.f;
         tBullet.fLimitDist = 500.f;
 
@@ -358,21 +363,19 @@ void Run()
     }
  
     /* 몬스터 이동 */
-    g_tMonster.tRC.t += g_tMonster.fSpeed * g_fDeltaTime * fTimeScale * g_tMonster.iDir;
-    g_tMonster.tRC.b += g_tMonster.fSpeed * g_fDeltaTime * fTimeScale * g_tMonster.iDir;
+    g_tMonster.tCircle.y += g_tMonster.fSpeed * g_fDeltaTime * fTimeScale * g_tMonster.iDir;
+    //g_tMonster.tRC.b += g_tMonster.fSpeed * g_fDeltaTime * fTimeScale * g_tMonster.iDir;
 
-    if( g_tMonster.tRC.b >= 600 )
+    if( g_tMonster.tCircle.y + g_tMonster.tCircle.r >= 600 )
     {
         g_tMonster.iDir = -1;
-        g_tMonster.tRC.b = 600;
-        g_tMonster.tRC.t = 500;
+        g_tMonster.tCircle.y = 600 - g_tMonster.tCircle.r;
     }
 
-    else if( g_tMonster.tRC.t <= 0 )
+    else if( g_tMonster.tCircle.y - g_tMonster.tCircle.r <= 0 )
     {
         g_tMonster.iDir = 1;
-        g_tMonster.tRC.b = 100;
-        g_tMonster.tRC.t = 0;
+        g_tMonster.tCircle.y = 0 + g_tMonster.tCircle.r;
     }
 
     /* 몬스터 총알 생성 */
@@ -384,14 +387,38 @@ void Run()
 
         BULLET tBullet = {};
 
-        tBullet.rc.r = g_tMonster.tRC.l;
-        tBullet.rc.l = tBullet.rc.r - 50.f;
-        tBullet.rc.t = (g_tMonster.tRC.t + g_tMonster.tRC.b) / 2.0f - 25.f;
-        tBullet.rc.b = tBullet.rc.t + 50.f;
+        tBullet.circle.r = 25.f;
+        tBullet.circle.x= g_tMonster.tCircle.x - g_tMonster.tCircle.r - tBullet.circle.r;
+        tBullet.circle.y = g_tMonster.tCircle.y;
         tBullet.fDist = 0.f;
         tBullet.fLimitDist = 800.f;
 
         g_MonsterBulletList.push_back( tBullet );
+    }
+
+    if( GetAsyncKeyState( VK_LBUTTON ) & 0x8000 )
+    {
+        // 마우스 위치 얻어옴
+        POINT ptMouse;
+        // 스크린 좌표 기준의 마우스 좌표 얻어오기
+        GetCursorPos( &ptMouse );
+        // 스크린 좌표 -> 클라이언트 좌표 변환
+        ScreenToClient( g_hWnd, &ptMouse );
+
+        // 플레이어와의 충돌 처리
+        if( g_tPlayerRC.l <= ptMouse.x && ptMouse.y <= g_tPlayerRC.r &&
+            g_tPlayerRC.t <= ptMouse.y && ptMouse.y <= g_tPlayerRC.b )
+        {
+            MessageBox( NULL, L"플레이어 클릭", L"마우스 클릭", MB_OK );
+        }
+        float fDistX = g_tMonster.tCircle.x - ptMouse.x;
+        float fDistY = g_tMonster.tCircle.y - ptMouse.y;
+        float fSqauredDist = fDistX * fDistX + fDistY * fDistY;
+        // 몬스터와의 충돌 처리
+        if( g_tMonster.tCircle.r * g_tMonster.tCircle.r >= fSqauredDist )
+        {
+            MessageBox( NULL, L"몬스터 클릭", L"마우스 클릭", MB_OK );
+        }
     }
 
     /* 플레이어 총알 이동 */
@@ -403,18 +430,26 @@ void Run()
 
     for( iter = g_PlayerBulletList.begin(); iter != iterEnd; )
     {
-        iter->rc.l += fSpeed;
-        iter->rc.r += fSpeed;
+        iter->circle.x += fSpeed;
 
         iter->fDist += fSpeed;
 
-        if( iter->fDist >= iter->fLimitDist )
+        float deltaX = iter->circle.x - g_tMonster.tCircle.x;
+        float deltaY = iter->circle.y - g_tMonster.tCircle.y;
+        float collisionDist = sqrtf( deltaX * deltaX + deltaY * deltaY );
+
+        // 플레이어 총알 대 몬스터 충돌 처리(원 끼리 충돌)
+        if( collisionDist <= iter->circle.r + g_tMonster.tCircle.r )
         {
             iter = g_PlayerBulletList.erase( iter );
             iterEnd = g_PlayerBulletList.end();
         }
-
-        else if( iter->rc.l > clientRect.right )
+        else if( iter->fDist >= iter->fLimitDist )
+        {
+            iter = g_PlayerBulletList.erase( iter );
+            iterEnd = g_PlayerBulletList.end();
+        }
+        else if( iter->circle.x - iter->circle.r >= clientRect.right )
         {
             iter = g_PlayerBulletList.erase( iter );
             iterEnd = g_PlayerBulletList.end();
@@ -429,11 +464,9 @@ void Run()
     iterEnd = g_MonsterBulletList.end();
     for( iter = g_MonsterBulletList.begin(); iter != iterEnd; )
     {
-        iter->rc.l -= fSpeed;
-        iter->rc.r -= fSpeed;
+        iter->circle.x -= fSpeed;
 
         iter->fDist += fSpeed;
-
 
         if( iter->fDist >= iter->fLimitDist )
         {
@@ -441,19 +474,20 @@ void Run()
             iterEnd = g_MonsterBulletList.end();
         }
 
-        else if( iter->rc.r <= 0 )
+        else if( iter->circle.x + iter->circle.r <= 0 )
         {
             iter = g_MonsterBulletList.erase( iter );
             iterEnd = g_MonsterBulletList.end();
         }
 
         // 충돌 조건
-        else if( g_tPlayerRC.l <= iter->rc.r && iter->rc.l <= g_tPlayerRC.r &&
-            g_tPlayerRC.t <= iter->rc.b && iter->rc.t <= g_tPlayerRC.b )
-        {
-            iter = g_MonsterBulletList.erase( iter );
-            iterEnd = g_MonsterBulletList.end();
-        }
+        //else if( g_tPlayerRC.l <= iter->rc.r && iter->rc.l <= g_tPlayerRC.r &&
+        //    g_tPlayerRC.t <= iter->rc.b && iter->rc.t <= g_tPlayerRC.b )
+        //{
+        //    iter = g_MonsterBulletList.erase( iter );
+        //    iterEnd = g_MonsterBulletList.end();
+        //}
+        
 
         else
         {
@@ -463,7 +497,10 @@ void Run()
 
     /* 출력 */
     // 몬스터 출력
-    Rectangle( g_hDC, g_tMonster.tRC.l, g_tMonster.tRC.t, g_tMonster.tRC.r, g_tMonster.tRC.b );
+    Ellipse( g_hDC, g_tMonster.tCircle.x - g_tMonster.tCircle.r,
+             g_tMonster.tCircle.y - g_tMonster.tCircle.r, 
+             g_tMonster.tCircle.x + g_tMonster.tCircle.r, 
+             g_tMonster.tCircle.y + g_tMonster.tCircle.r );
 
     // 플레이어 출력
     Rectangle( g_hDC, g_tPlayerRC.l, g_tPlayerRC.t, g_tPlayerRC.r, g_tPlayerRC.b );
@@ -472,14 +509,20 @@ void Run()
     iterEnd = g_PlayerBulletList.end();
     for( iter = g_PlayerBulletList.begin(); iter != iterEnd; ++iter )
     {
-        Rectangle( g_hDC, iter->rc.l, iter->rc.t, iter->rc.r, iter->rc.b );
+        float x = iter->circle.x;
+        float y = iter->circle.y;
+        float r = iter->circle.r;
+        Ellipse( g_hDC, x - r, y - r, x + r, y + r );
     }
 
     // 몬스터 총알 출력
     iterEnd = g_MonsterBulletList.end();
     for( iter = g_MonsterBulletList.begin(); iter != iterEnd; ++iter )
     {
-        Rectangle( g_hDC, iter->rc.l, iter->rc.t, iter->rc.r, iter->rc.b );
+        float x = iter->circle.x;
+        float y = iter->circle.y;
+        float r = iter->circle.r;
+        Ellipse( g_hDC, x - r, y - r, x + r, y + r );
     }
 
     // 800*600 사각형으로 화면 덮기
