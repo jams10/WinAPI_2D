@@ -25,6 +25,7 @@ typedef struct _tagBullet
     CIRCLE    circle;
     float     fDist;
     float     fLimitDist;
+    float     fAngle;
 }BULLET, * PBULLET;
 
 typedef struct _tagMonster
@@ -36,6 +37,12 @@ typedef struct _tagMonster
     int       iDir;
 }MONSTER, * PMONSTER;
 
+typedef struct _tagFloatPoint
+{
+    float x;
+    float y;
+}FPOINT, * PFPOINT;
+
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -45,8 +52,14 @@ HWND g_hWnd;
 HDC  g_hDC;
 bool g_bLoop = true;
 
-RECTANGLE g_tPlayerRC = { 100, 100, 200, 200 };
-MONSTER g_tMonster;
+CIRCLE    g_tPlayer = { 50.f, 50.f, 50.f };
+MONSTER   g_tMonster;
+
+POINT     g_tGunPos;
+float     g_fPlayerAngle = 0.f;
+float     g_fGunLength = 70.f;
+
+#define PI 3.141592f
 
 // 플레이어 총알 리스트
 std::list<BULLET> g_PlayerBulletList;
@@ -66,6 +79,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 void Run();
+float GetAngle( FPOINT origin, FPOINT target );
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -98,6 +112,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     g_tMonster.fSpeed = 300.f;
     g_tMonster.fLimitTime = 1.2f;
     g_tMonster.iDir = 1;
+
+    // 플레이어 총구의 위치를 구해준다.
+    g_tGunPos.x = g_tPlayer.x + cosf( g_fPlayerAngle ) * g_fGunLength; // cosf 값은 0~PI 기준.
+    g_tGunPos.y = g_tPlayer.y + sinf( g_fPlayerAngle ) * g_fGunLength;
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ASSORTROCKWINAPI));
 
@@ -310,56 +328,82 @@ void Run()
 
     if( GetAsyncKeyState( 'D' ) & 0x8000 )
     {
-        g_tPlayerRC.l += fSpeed;
-        g_tPlayerRC.r += fSpeed;
-        if( g_tPlayerRC.r > clientRect.right )
-        {
-            g_tPlayerRC.r = clientRect.right;
-            g_tPlayerRC.l = clientRect.right - 100;
-        }
+        g_fPlayerAngle += PI * g_fDeltaTime * fTimeScale;
     }
     if( GetAsyncKeyState( 'A' ) & 0x8000 )
     {
-        g_tPlayerRC.l -= fSpeed;
-        g_tPlayerRC.r -= fSpeed;
-        if( g_tPlayerRC.l < clientRect.left )
-        {
-            g_tPlayerRC.l = 0;
-            g_tPlayerRC.r = clientRect.left + 100;
-        }
+        g_fPlayerAngle -= PI * g_fDeltaTime * fTimeScale;
     }
     if( GetAsyncKeyState( 'W' ) & 0x8000 )
     {
-        g_tPlayerRC.t -= fSpeed;
-        g_tPlayerRC.b -= fSpeed;
-        if( g_tPlayerRC.t < clientRect.top )
-        {
-            g_tPlayerRC.t = clientRect.top;
-            g_tPlayerRC.b = clientRect.top + 100;
-        }
+        g_tPlayer.x += fSpeed * cosf( g_fPlayerAngle );
+        g_tPlayer.y += fSpeed * sinf( g_fPlayerAngle );
     }
     if( GetAsyncKeyState( 'S' ) & 0x8000 )
     {
-        g_tPlayerRC.t += fSpeed;
-        g_tPlayerRC.b += fSpeed;
-        if( g_tPlayerRC.b > clientRect.bottom )
-        {
-            g_tPlayerRC.b = clientRect.bottom;
-            g_tPlayerRC.t = clientRect.bottom - 100;
-        }
+        g_tPlayer.x -= fSpeed * cosf( g_fPlayerAngle );
+        g_tPlayer.y -= fSpeed * sinf( g_fPlayerAngle );
     }
+
+    // 총구 위치 구하기
+    g_tGunPos.x = g_tPlayer.x + cosf( g_fPlayerAngle ) * g_fGunLength;
+    g_tGunPos.y = g_tPlayer.y + sinf( g_fPlayerAngle ) * g_fGunLength;
+
     /* 플레이어 총알 생성 */
     if( GetAsyncKeyState( VK_SPACE ) & 0x8000 )
     {
         BULLET tBullet = {};
-
-        tBullet.circle.r = 25.f;
-        tBullet.circle.x = g_tPlayerRC.r + tBullet.circle.r;
-        tBullet.circle.y = (g_tPlayerRC.t + g_tPlayerRC.b) / 2.0f;;
+         
+        tBullet.circle.r = g_tPlayer.r / 2.f;
+        tBullet.circle.x = g_tGunPos.x + cosf( g_fPlayerAngle ) * tBullet.circle.r;
+        tBullet.circle.y = g_tGunPos.y + sinf( g_fPlayerAngle ) * tBullet.circle.r;
         tBullet.fDist = 0.f;
         tBullet.fLimitDist = 500.f;
+        tBullet.fAngle = g_fPlayerAngle;
 
         g_PlayerBulletList.push_back( tBullet );
+    }
+
+    // 여러개 총알 15도
+    if( GetAsyncKeyState( '1' ) & 0x8000 )
+    {
+        float fAngle = g_fPlayerAngle - PI / 12.f;
+
+        for( int i = 0; i < 3; ++i )
+        {
+            BULLET tBullet = {};
+
+            tBullet.circle.r = g_tPlayer.r / 2.f;
+            tBullet.circle.x = g_tGunPos.x + cosf( fAngle ) * tBullet.circle.r;
+            tBullet.circle.y = g_tGunPos.y + sinf( fAngle ) * tBullet.circle.r;
+            tBullet.fDist = 0.f;
+            tBullet.fLimitDist = 500.f;
+            tBullet.fAngle = fAngle;
+
+            g_PlayerBulletList.push_back( tBullet );
+            fAngle += PI / 12.f;
+        }
+    }
+
+    // 여러개 총알 사방 10도씩 36번 -> 360도
+    if( GetAsyncKeyState( '2' ) & 0x8000 )
+    {
+        float fAngle = 0.f;
+
+        for( int i = 0; i < 36; ++i )
+        {
+            BULLET tBullet = {};
+
+            tBullet.circle.r = g_tPlayer.r / 2.f;
+            tBullet.circle.x = g_tGunPos.x + cosf( fAngle ) * tBullet.circle.r;
+            tBullet.circle.y = g_tGunPos.y + sinf( fAngle ) * tBullet.circle.r;
+            tBullet.fDist = 0.f;
+            tBullet.fLimitDist = 500.f;
+            tBullet.fAngle = fAngle;
+
+            g_PlayerBulletList.push_back( tBullet );
+            fAngle += PI / 18.f;
+        }
     }
  
     /* 몬스터 이동 */
@@ -392,6 +436,7 @@ void Run()
         tBullet.circle.y = g_tMonster.tCircle.y;
         tBullet.fDist = 0.f;
         tBullet.fLimitDist = 800.f;
+        tBullet.fAngle = GetAngle( FPOINT{ tBullet.circle.x, tBullet.circle.y }, FPOINT{ g_tPlayer.x, g_tPlayer.y } );
 
         g_MonsterBulletList.push_back( tBullet );
     }
@@ -406,8 +451,8 @@ void Run()
         ScreenToClient( g_hWnd, &ptMouse );
 
         // 플레이어와의 충돌 처리
-        if( g_tPlayerRC.l <= ptMouse.x && ptMouse.y <= g_tPlayerRC.r &&
-            g_tPlayerRC.t <= ptMouse.y && ptMouse.y <= g_tPlayerRC.b )
+        if( g_tPlayer.x - g_tPlayer.r <= ptMouse.x && ptMouse.x <= g_tPlayer.x + g_tPlayer.r &&
+            g_tPlayer.y - g_tPlayer.r <= ptMouse.y && ptMouse.y <= g_tPlayer.y + g_tPlayer.r )
         {
             MessageBox( NULL, L"플레이어 클릭", L"마우스 클릭", MB_OK );
         }
@@ -430,7 +475,8 @@ void Run()
 
     for( iter = g_PlayerBulletList.begin(); iter != iterEnd; )
     {
-        iter->circle.x += fSpeed;
+        iter->circle.x += fSpeed * cosf(iter->fAngle) * fTimeScale;
+        iter->circle.y += fSpeed * sinf(iter->fAngle) * fTimeScale;
 
         iter->fDist += fSpeed;
 
@@ -464,7 +510,9 @@ void Run()
     iterEnd = g_MonsterBulletList.end();
     for( iter = g_MonsterBulletList.begin(); iter != iterEnd; )
     {
-        iter->circle.x -= fSpeed;
+        //iter->circle.x -= fSpeed;
+        iter->circle.x += fSpeed * cosf( iter->fAngle ) * fTimeScale;
+        iter->circle.y += fSpeed * sinf( iter->fAngle ) * fTimeScale;
 
         iter->fDist += fSpeed;
 
@@ -481,8 +529,8 @@ void Run()
         }
 
         // 충돌 조건
-        //else if( g_tPlayerRC.l <= iter->rc.r && iter->rc.l <= g_tPlayerRC.r &&
-        //    g_tPlayerRC.t <= iter->rc.b && iter->rc.t <= g_tPlayerRC.b )
+        //else if( g_tPlayer.l <= iter->rc.r && iter->rc.l <= g_tPlayer.r &&
+        //    g_tPlayer.t <= iter->rc.b && iter->rc.t <= g_tPlayer.b )
         //{
         //    iter = g_MonsterBulletList.erase( iter );
         //    iterEnd = g_MonsterBulletList.end();
@@ -503,7 +551,14 @@ void Run()
              g_tMonster.tCircle.y + g_tMonster.tCircle.r );
 
     // 플레이어 출력
-    Rectangle( g_hDC, g_tPlayerRC.l, g_tPlayerRC.t, g_tPlayerRC.r, g_tPlayerRC.b );
+    Ellipse( g_hDC, g_tPlayer.x - g_tPlayer.r, 
+        g_tPlayer.y - g_tPlayer.r, 
+        g_tPlayer.x + g_tPlayer.r, 
+        g_tPlayer.y + g_tPlayer.r );
+
+    // 총구 출력
+    MoveToEx( g_hDC, g_tPlayer.x, g_tPlayer.y, NULL );
+    LineTo( g_hDC, g_tGunPos.x, g_tGunPos.y );
 
     // 플레이어 총알 출력
     iterEnd = g_PlayerBulletList.end();
@@ -527,4 +582,29 @@ void Run()
 
     // 800*600 사각형으로 화면 덮기
     // Rectangle( g_hDC, 0, 0, 800, 600 );
+    float a = GetAngle( FPOINT{ 0.f, 0.f }, FPOINT{ -2.f, -2.f } );
+}
+
+// 각도는 오직 CCW(Counter Clock Wise) 방향으로만 회전한다고 제한.
+/*
+    cos(135º) = -sqrt(2)/2
+    근데, cos(225º) 또한 -sqrt(2)/2임. acos 함수의 범위는 0 ~ PI 이므로,
+    acos(-sqrt(2)/2)를 할 경우, 135도 값에 해당하는 라디안 값을 리턴해 줄 것임.
+    따라서, 225도에 해당하는 라디안 값을 얻기 위해 다음과 같이 함.
+    225 = 360 - 135 이고, target의 y 값이 origin의 y값 보다 작을 경우, 180도를 넘어간 것으로 간주.
+    360도의 라디안 값 2 * PI 에서 acos 결과로 리턴된 라디안 값을 빼준다.
+    즉, cos(theta) = cos(-theta) 이기 때문에, 부호 없다고 생각하고 전체 원 360 - 135 = 225를 수행하는 것.
+*/
+float GetAngle( FPOINT origin, FPOINT target )
+{
+    float x = (target.x - origin.x);
+    float y = (target.y - origin.y);
+
+    float dist = sqrt(x * x + y * y);
+
+    if( target.y < origin.y )
+    {
+        return 2 * PI - acos( x / dist );
+    }
+    else return acos( x / dist );
 }
