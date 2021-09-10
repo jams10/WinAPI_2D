@@ -16,13 +16,19 @@
     <Filter Include="01. Core">
       <UniqueIdentifier>{f20d6c66-ca7b-4bf7-bc23-1067e5e77181}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Scene">
+      <UniqueIdentifier>{c60e8fe2-cd59-4fa0-ad0e-f67f69e8c336}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>01. Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneManager.cpp">
+      <Filter>02. Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -32,14 +38,17 @@
     <ClInclude Include="Macro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="types.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>01. Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneManager.h">
+      <Filter>02. Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
