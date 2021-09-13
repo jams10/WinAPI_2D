@@ -37,6 +37,9 @@ public:
 	int Run();
 
 private:
+	void Logic();
+
+private:
 	ATOM MyRegisterClass();
 	BOOL Create();
 
