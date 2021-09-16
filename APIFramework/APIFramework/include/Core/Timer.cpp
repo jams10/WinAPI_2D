@@ -2,6 +2,14 @@
 
 DEFINITION_SINGLE(CTimer)
 
+CTimer::CTimer()
+{
+}
+
+CTimer::~CTimer()
+{
+}
+
 bool CTimer::Init()
 {
 	QueryPerformanceFrequency( &m_tSecond );

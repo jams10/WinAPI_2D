@@ -24,3 +24,4 @@
 #define DEFINITION_SINGLE(Type) Type* Type::m_pInst = nullptr;
 #define GET_SINGLE(Type) Type::GetInst()
 #define DESTROY_SINGLE(Type) Type::DestroyInst()
+
