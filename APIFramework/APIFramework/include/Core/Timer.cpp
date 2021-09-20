@@ -1,8 +1,10 @@
 #include "Timer.h"
 
-DEFINITION_SINGLE(CTimer)
+DEFINITION_SINGLE( CTimer )
 
 CTimer::CTimer()
+	:
+	m_fTimeScale( 1.f )
 {
 }
 

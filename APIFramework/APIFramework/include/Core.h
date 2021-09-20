@@ -30,6 +30,7 @@ private:
 private:
 	HINSTANCE	m_hInst;
 	HWND		m_hWnd;
+	HDC			m_hDC;
 	RESOLUTION  m_tRs;
 
 public:
@@ -38,6 +39,11 @@ public:
 
 private:
 	void Logic();
+	void Input( float fDeltaTime );
+	int Update( float fDeltaTime );
+	int LateUpdate( float fDeltaTime );
+	void Collision( float fDeltaTime );
+	void Render( float fDeltaTime );
 
 private:
 	ATOM MyRegisterClass();

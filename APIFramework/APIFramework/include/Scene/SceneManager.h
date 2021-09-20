@@ -10,6 +10,11 @@ private:
 
 public:
 	bool Init();
+	void Input( float fDeltaTime );
+	int Update( float fDeltaTime );
+	int LateUpdate( float fDeltaTime );
+	void Collision( float fDeltaTime );
+	void Render( HDC hDC, float fDeltaTime );
 
 public:
 	template<typename T>

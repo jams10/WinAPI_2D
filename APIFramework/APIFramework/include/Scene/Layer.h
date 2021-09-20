@@ -14,9 +14,10 @@ public:
 	~CLayer();
 
 private:
-	class CScene*	m_pScene;
-	string			m_strTag;
-	int				m_iZOrder;
+	class CScene*		m_pScene;
+	string				m_strTag;
+	int					m_iZOrder;
+	list<class CObject*>	m_ObjList;
 
 public:
 	void SetScene( class CScene* pScene )
@@ -49,5 +50,11 @@ public:
 		return m_iZOrder;
 	}
 
+public:
+	void Input( float fDeltaTime );
+	int Update( float fDeltaTime );
+	int LateUpdate( float fDeltaTime );
+	void Collision( float fDeltaTime );
+	void Render( HDC hDC, float fDeltaTime );
 };
 
