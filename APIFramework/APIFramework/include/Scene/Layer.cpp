@@ -14,6 +14,15 @@ CLayer::~CLayer()
 	Safe_Release_VecList( m_ObjList );
 }
 
+void CLayer::AddObject( CObject* pObject )
+{
+	pObject->SetScene( m_pScene );
+	pObject->SetLayer( this );
+	pObject->AddRef();
+
+	m_ObjList.push_back( pObject );
+}
+
 void CLayer::Input( float fDeltaTime )
 {
 	list<CObject*>::iterator iter;

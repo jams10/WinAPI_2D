@@ -51,6 +51,9 @@ public:
 	}
 
 public:
+	void AddObject( class CObject* pObject );
+
+public:
 	void Input( float fDeltaTime );
 	int Update( float fDeltaTime );
 	int LateUpdate( float fDeltaTime );

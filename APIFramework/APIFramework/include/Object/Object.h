@@ -1,40 +1,34 @@
 #pragma once
 
 #include "../Game.h"
+#include "../Ref.h"
 
-class CObject
+class CObject : public CRef
 {
 protected:
 	CObject();
+	CObject( const CObject& obj );
 	virtual ~CObject();
 
 protected:
-	int			m_iRef;
-
-public:
-	void AddRef()
-	{
-		++m_iRef;
-	}
-
-	int Release()
-	{
-		--m_iRef;
-
-		if( m_iRef == 0 )
-		{
-			delete this;
-			return 0;
-		}
-		return m_iRef;
-	}
+	class CScene* m_pScene;
+	class CLayer* m_pLayer;
 
 protected:
 	string      m_strTag;
 	POSITION	m_tPos;
 	_SIZE		m_tSize;
+	POSITION	m_tPivot;
 
 public:
+	CScene* GetScene() const
+	{
+		return m_pScene;
+	}
+	CLayer* GetLayer() const
+	{
+		return m_pLayer;
+	}
 	string GetTag() const
 	{
 		return m_strTag;
@@ -51,6 +45,16 @@ public:
 	}
 
 public:
+	// scene
+	void SetScene( class CScene* pScene )
+	{
+		m_pScene = pScene;
+	}
+	// layer
+	void SetLayer( class CLayer* pLayer )
+	{
+		m_pLayer = pLayer;
+	}
 	// tag
 	void SetTag( const string& strTag )
 	{
@@ -86,11 +90,33 @@ public:
 	}
 
 public:
-	virtual bool Init();
+	virtual bool Init() = 0;
 	virtual void Input( float fDeltaTime );
 	virtual int Update( float fDeltaTime );
 	virtual int LateUpdate( float fDeltaTime );
 	virtual void Collision( float fDeltaTime );
 	virtual void Render( HDC hDC, float fDeltaTime );
+
+public:
+	template <typename T>
+	static T* CreateObj( const string& strTag, class CLayer* pLayer = nullptr )
+	{
+		T* pObj = new T;
+
+		if( !pObj->Init() )
+		{
+			SAFE_RELEASE( pObj );
+			return nullptr;
+		}
+
+		if( pLayer )
+		{
+			pLayer->AddObject( pObj );
+		}
+
+		pObj->AddRef();
+
+		return pObj;
+	}
 };
 

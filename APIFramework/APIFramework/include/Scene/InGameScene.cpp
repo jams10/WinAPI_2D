@@ -1,4 +1,6 @@
 #include "InGameScene.h"
+#include "../Object/Player.h"
+#include "Layer.h"
 
 CInGameScene::CInGameScene()
 {

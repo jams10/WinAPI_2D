@@ -148,6 +148,10 @@
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Object\MoveObject.cpp" />
+    <ClCompile Include="Object\Player.cpp" />
+    <ClCompile Include="Object\StaticObject.cpp" />
+    <ClCompile Include="Ref.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object\Object.cpp" />
     <ClCompile Include="Scene\InGameScene.cpp" />
@@ -158,6 +162,10 @@
   <ItemGroup>
     <ClInclude Include="Core.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Object\MoveObject.h" />
+    <ClInclude Include="Object\Player.h" />
+    <ClInclude Include="Object\StaticObject.h" />
+    <ClInclude Include="Ref.h" />
     <ClInclude Include="Flag.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Macro.h" />
