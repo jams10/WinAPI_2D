@@ -34,6 +34,9 @@ private:
 	RESOLUTION  m_tRs;
 
 public:
+	RESOLUTION GetResolution() const { return m_tRs; }
+
+public:
 	bool Init( HINSTANCE hInst );
 	int Run();
 

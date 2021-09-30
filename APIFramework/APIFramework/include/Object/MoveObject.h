@@ -9,6 +9,36 @@ protected:
 	CMoveObject( const CMoveObject& obj );
 	virtual ~CMoveObject();
 
+private:
+	float		m_fAngle;
+	float       m_fSpeed;
+
+public:
+	void SetAngle( float fAngle )
+	{
+		m_fAngle = fAngle;
+	}
+	void SetSpeed( float fSpeed )
+	{
+		m_fSpeed = fSpeed;
+	}
+	float GetAngle() const { return m_fAngle; }
+	float GetSpeed() const { return m_fSpeed; }
+
+public:
+	void Move( float x, float y );
+	void Move( float x, float y, float fDeltaTime );
+	void Move( const POSITION& tMove );
+	void Move( const POSITION& tMove, float fDeltaTime );
+	void MoveX( float x );
+	void MoveX( float x, float fDeltaTime );
+	void MoveXBySpeed( float fDeltaTime, MOVE_DIR eDir );
+	void MoveY( float y );
+	void MoveY( float y, float fDeltaTime );
+	void MoveYAsSpeed( float fDeltaTime, MOVE_DIR eDir );
+	void MoveAngle( float fSpeed );
+	void MoveAngle( float fSpeed, float fDeltaTime );
+
 public:
 	virtual bool Init() = 0;
 	virtual void Input( float fDeltaTime );

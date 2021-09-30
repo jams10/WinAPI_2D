@@ -46,7 +46,7 @@ CLayer* CScene::FindLayer( const string& strTag )
 
 bool CScene::Init()
 {
-    return false;
+    return true;
 }
 
 void CScene::Input( float fDeltaTime )

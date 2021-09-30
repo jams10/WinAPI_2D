@@ -2,6 +2,7 @@
 
 #include "../Game.h"
 #include "../Ref.h"
+#include "../Scene/Layer.h"
 
 class CObject : public CRef
 {
@@ -114,9 +115,6 @@ public:
 			pLayer->AddObject( pObj );
 		}
 
-		pObj->AddRef();
-
 		return pObj;
 	}
 };
-

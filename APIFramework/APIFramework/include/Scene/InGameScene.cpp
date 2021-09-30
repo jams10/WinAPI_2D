@@ -1,5 +1,6 @@
 #include "InGameScene.h"
 #include "../Object/Player.h"
+#include "../Object/Minion.h"
 #include "Layer.h"
 
 CInGameScene::CInGameScene()
@@ -18,7 +19,15 @@ bool CInGameScene::Init()
         return false;
     }
 
-    // 본인 기능 수행.
+    CLayer* pLayer = FindLayer( "Default" );
+
+    CPlayer* pPlayer = CObject::CreateObj<CPlayer>( "Player", pLayer );
+
+    SAFE_RELEASE( pPlayer );
+
+    CMinion* pMinion = CObject::CreateObj<CMinion>( "Minion", pLayer );
+
+    SAFE_RELEASE( pMinion );
 
     return true;
 }
