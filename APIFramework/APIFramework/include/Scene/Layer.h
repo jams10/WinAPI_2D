@@ -18,6 +18,8 @@ private:
 	string				m_strTag;
 	int					m_iZOrder;
 	list<class CObject*>	m_ObjList;
+	bool                m_bEnable;
+	bool                m_bLife;
 
 public:
 	void SetScene( class CScene* pScene )
@@ -48,6 +50,26 @@ public:
 	int GetZOrder() const
 	{
 		return m_iZOrder;
+	}
+
+	void SetEnable( bool bEnable )
+	{
+		m_bEnable = bEnable;
+	}
+
+	void Die()
+	{
+		m_bLife = false;
+	}
+
+	bool GetEnable() const
+	{
+		return m_bEnable;
+	}
+
+	bool GetLife() const
+	{
+		return m_bLife;
 	}
 
 public:

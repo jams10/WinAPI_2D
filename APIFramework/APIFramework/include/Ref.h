@@ -10,6 +10,8 @@ protected:
 
 protected:
 	int		m_iRef;
+	bool    m_bEnable;
+	bool    m_bLife;
 
 public:
 	void AddRef()
@@ -27,6 +29,26 @@ public:
 			return 0;
 		}
 		return m_iRef;
+	}
+
+	void SetEnable( bool bEnable )
+	{
+		m_bEnable = bEnable;
+	}
+
+	void Die()
+	{
+		m_bLife = false;
+	}
+
+	bool GetEnable() const
+	{
+		return m_bEnable;
+	}
+
+	bool GetLife() const
+	{
+		return m_bLife;
 	}
 };
 
