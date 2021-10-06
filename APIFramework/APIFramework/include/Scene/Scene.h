@@ -12,6 +12,14 @@ protected:
 	CScene();
 	virtual ~CScene() = 0; // 순수 가상함수. 추상클래스.
 
+private:
+	static unordered_map<string, class CObject*> m_mapPrototype;
+
+public:
+	static void ErasePrototype( const string& strTag );
+	static void ErasePrototype();
+	static CObject* FindPrototype( const string& strKey );
+
 protected:
 	list<class CLayer*> m_LayerList;
 
@@ -29,5 +37,24 @@ public:
 
 public:
 	static bool LayerSort( CLayer* pL1, CLayer* pL2 );
+
+	template <typename T>
+	static T* CreatePrototype( const string& strTag )
+	{
+		T* pObj = new T;
+
+		pObj->SetTag( strTag );
+
+		if( !pObj->Init() )
+		{
+			SAFE_RELEASE( pObj );
+			return nullptr;
+		}
+
+		pObj->AddRef();
+		m_mapPrototype.insert( make_pair( strTag, pObj ) );
+
+		return pObj;
+	}
 };
 

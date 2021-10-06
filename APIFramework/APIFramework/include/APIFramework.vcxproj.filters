@@ -28,6 +28,21 @@
     <Filter Include="03. Object">
       <UniqueIdentifier>{d1de2cd5-20c0-4e99-bba9-495ddf2192e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. Object\01. MoveObject">
+      <UniqueIdentifier>{b6cf9380-756b-4197-9dfd-4862b1b0d017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Object\01. MoveObject\01. Player">
+      <UniqueIdentifier>{22d68afc-bf06-402e-9482-78e550ae50d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Object\01. MoveObject\02. Monster">
+      <UniqueIdentifier>{8a3cc27c-e17a-470a-921c-d1c80fbcd927}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Object\02. StaticObject">
+      <UniqueIdentifier>{ca7adedf-bc3a-4c98-bcfe-17692b00da23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Object\01. MoveObject\03. Bullet">
+      <UniqueIdentifier>{57b62fd0-0c00-4de8-ab34-9ba403775232}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -58,16 +73,19 @@
       <Filter>01. Core</Filter>
     </ClCompile>
     <ClCompile Include="Object\MoveObject.cpp">
-      <Filter>03. Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Object\StaticObject.cpp">
-      <Filter>03. Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Object\Player.cpp">
-      <Filter>03. Object</Filter>
+      <Filter>03. Object\01. MoveObject</Filter>
     </ClCompile>
     <ClCompile Include="Object\Minion.cpp">
-      <Filter>03. Object</Filter>
+      <Filter>03. Object\01. MoveObject\02. Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Player.cpp">
+      <Filter>03. Object\01. MoveObject\01. Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\StaticObject.cpp">
+      <Filter>03. Object\02. StaticObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Bullet.cpp">
+      <Filter>03. Object\01. MoveObject\03. Bullet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,16 +129,19 @@
       <Filter>01. Core</Filter>
     </ClInclude>
     <ClInclude Include="Object\MoveObject.h">
-      <Filter>03. Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\StaticObject.h">
-      <Filter>03. Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Player.h">
-      <Filter>03. Object</Filter>
+      <Filter>03. Object\01. MoveObject</Filter>
     </ClInclude>
     <ClInclude Include="Object\Minion.h">
-      <Filter>03. Object</Filter>
+      <Filter>03. Object\01. MoveObject\02. Monster</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Player.h">
+      <Filter>03. Object\01. MoveObject\01. Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\StaticObject.h">
+      <Filter>03. Object\02. StaticObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Bullet.h">
+      <Filter>03. Object\01. MoveObject\03. Bullet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,8 @@
 #include "Scene.h"
 #include "Layer.h"
+#include "../Object/Object.h"
+
+unordered_map<string, class CObject*> CScene::m_mapPrototype;
 
 CScene::CScene()
 {
@@ -9,7 +12,36 @@ CScene::CScene()
 
 CScene::~CScene()
 {
+    ErasePrototype();
     Safe_Delete_VecList( m_LayerList );
+}
+
+void CScene::ErasePrototype( const string& strTag )
+{
+    auto iter = m_mapPrototype.find( strTag );
+
+    if( !iter->second )
+        return;
+
+    SAFE_RELEASE( iter->second );
+    m_mapPrototype.erase( iter );
+}
+
+void CScene::ErasePrototype()
+{
+    Safe_Release_Map( m_mapPrototype );
+}
+
+CObject* CScene::FindPrototype( const string& strKey )
+{
+    auto iter = m_mapPrototype.find( strKey );
+
+    if( iter == m_mapPrototype.end() )
+    {
+        return nullptr;
+    }
+
+    return iter->second;
 }
 
 CLayer* CScene::CreateLayer( const string& strTag, int iZOrder )

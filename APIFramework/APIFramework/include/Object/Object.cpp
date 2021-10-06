@@ -1,7 +1,9 @@
 #include "Object.h"
+#include "../Scene/Layer.h"
+#include "../Scene/SceneManager.h"
+#include "../Scene/Scene.h"
 
 list<CObject*> CObject::m_ObjList;
-unordered_map<string, CObject*> CObject::m_mapPrototype;
 
 CObject::CObject()
 {
@@ -37,18 +39,6 @@ CObject* CObject::FindObject( const string& strTag )
 	}
 
 	return nullptr;
-}
-
-CObject* CObject::FindPrototype( const string& strKey )
-{
-	auto iter = m_mapPrototype.find( strKey );
-
-	if( iter == m_mapPrototype.end() )
-	{
-		return nullptr;
-	}
-
-	return iter->second;
 }
 
 void CObject::EraseObj( CObject* pObj )
@@ -88,22 +78,6 @@ void CObject::EraseObj()
 	Safe_Release_VecList( m_ObjList );
 }
 
-void CObject::ErasePrototype( const string& strTag )
-{
-	auto iter = m_mapPrototype.find( strTag );
-
-	if( !iter->second )
-		return;
-
-	SAFE_RELEASE( iter->second );
-	m_mapPrototype.erase( iter );
-}
-
-void CObject::ErasePrototype()
-{
-	Safe_Release_Map( m_mapPrototype );
-}
-
 void CObject::Input( float fDeltaTime )
 {
 }
@@ -128,7 +102,7 @@ void CObject::Render( HDC hDC, float fDeltaTime )
 
 CObject* CObject::CreateCloneObj( const string& strPrototypeKey, const string& strTag, CLayer* pLayer )
 {
-	CObject* pProto = FindPrototype( strPrototypeKey );
+	CObject* pProto = CScene::FindPrototype( strPrototypeKey );
 
 	if( !pProto ) return nullptr;
 

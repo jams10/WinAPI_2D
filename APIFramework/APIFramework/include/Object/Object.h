@@ -7,13 +7,15 @@
 class CObject : public CRef
 {
 protected:
+	friend class CScene;
+
+protected:
 	CObject();
 	CObject( const CObject& obj );
 	virtual ~CObject();
 
 private:
 	static list<CObject*> m_ObjList;
-	static unordered_map<string, CObject*> m_mapPrototype;
 
 public:
 	static void AddObj( CObject* pObj );
@@ -21,11 +23,6 @@ public:
 	static void EraseObj( CObject* pObj );
 	static void EraseObj( const string& strTag );
 	static void EraseObj();
-	static void ErasePrototype( const string& strTag );
-	static void ErasePrototype();
-
-private:
-	static CObject* FindPrototype( const string& strKey );
 
 protected:
 	class CScene* m_pScene;
@@ -135,25 +132,6 @@ public:
 		}
 
 		AddObj( pObj );
-
-		return pObj;
-	}
-
-	template <typename T>
-	static T* CreatePrototype( const string& strTag )
-	{
-		T* pObj = new T;
-
-		pObj->SetTag( strTag );
-
-		if( !pObj->Init() )
-		{
-			SAFE_RELEASE( pObj );
-			return nullptr;
-		}
-
-		pObj->AddRef();
-		m_mapPrototype.insert( mae_pari( strTag, pObj ) );
 
 		return pObj;
 	}
