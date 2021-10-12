@@ -15,6 +15,10 @@ using namespace std;
 
 #define PI 3.141592f
 
+// °æ·Î Å°
+#define ROOT_PATH		"RootPath"
+#define TEXTURE_PATH	"TexturePath"					
+
 template<typename T>
 void Safe_Delete_VecList( T& p )
 {
