@@ -15,7 +15,7 @@ protected:
 	virtual ~CObject();
 
 private:
-	static list<CObject*> m_ObjList;
+	static list<CObject*>	m_ObjList;
 
 public:
 	static void AddObj( CObject* pObj );
@@ -29,10 +29,11 @@ protected:
 	class CLayer* m_pLayer;
 
 protected:
-	string      m_strTag;
-	POSITION	m_tPos;
-	_SIZE		m_tSize;
-	POSITION	m_tPivot;
+	string			m_strTag;
+	POSITION		m_tPos;
+	_SIZE			m_tSize;
+	POSITION		m_tPivot;
+	class CTexture* m_pTexture;
 
 public:
 	CScene* GetScene() const
@@ -102,6 +103,11 @@ public:
 		m_tSize.x = x;
 		m_tSize.y = y;
 	}
+	// texture
+	void SetTexture( class CTexture* pTexture );
+	void SetTexture( const string& strKey,
+		const wchar_t* pFileName = NULL,
+		const string& strPathKey = TEXTURE_PATH );
 
 public:
 	virtual bool Init() = 0;

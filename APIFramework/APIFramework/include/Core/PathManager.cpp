@@ -29,7 +29,7 @@ bool CPathManager::Init()
 	m_mapPath.insert( make_pair( ROOT_PATH, strPath ) );
 
 	// Texture 폴더 경로 설정
-	if( !CreatePath( TEXTURE_PATH, L"Texture\\" ) )
+	if( !CreatePath( TEXTURE_PATH, L"Textures\\" ) )
 	{
 		return false;
 	}

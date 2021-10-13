@@ -85,22 +85,27 @@ void CMoveObject::MoveAngle( float fDeltaTime )
 
 void CMoveObject::Input( float fDeltaTime )
 {
+	CObject::Input( fDeltaTime );
 }
 
 int CMoveObject::Update( float fDeltaTime )
 {
+	CObject::Update( fDeltaTime );
 	return 0;
 }
 
 int CMoveObject::LateUpdate( float fDeltaTime )
 {
+	CObject::LateUpdate( fDeltaTime );
 	return 0;
 }
 
 void CMoveObject::Collision( float fDeltaTime )
 {
+	CObject::Collision( fDeltaTime );
 }
 
 void CMoveObject::Render( HDC hDC, float fDeltaTime )
 {
+	CObject::Render( hDC, fDeltaTime );
 }

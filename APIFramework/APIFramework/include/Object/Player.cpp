@@ -17,8 +17,10 @@ CPlayer::~CPlayer()
 bool CPlayer::Init()
 {
     SetPos( 100.f, 100.f );
-    SetSize( 100.f, 100.f );
+    SetSize( 290.f, 289.f );
     SetSpeed( 400.f );
+
+    SetTexture( "Player", L"Kirby.bmp" );
 
     return true;
 }
@@ -71,7 +73,7 @@ void CPlayer::Collision( float fDeltaTime )
 void CPlayer::Render( HDC hDC, float fDeltaTime )
 {
     CMoveObject::Render( hDC, fDeltaTime );
-    Rectangle( hDC, m_tPos.x, m_tPos.y, m_tPos.x + m_tSize.x, m_tPos.y + m_tSize.y );
+    //Rectangle( hDC, m_tPos.x, m_tPos.y, m_tPos.x + m_tSize.x, m_tPos.y + m_tSize.y );
 }
 
 CPlayer* CPlayer::Clone()
