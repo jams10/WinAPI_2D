@@ -16,9 +16,10 @@ CPlayer::~CPlayer()
 
 bool CPlayer::Init()
 {
-    SetPos( 100.f, 100.f );
-    SetSize( 290.f, 289.f );
+    SetPos( 0.f, 0.f );
+    SetSize( 203.f, 203.f );
     SetSpeed( 400.f );
+    SetPivot( 0.5f, 0.5f );
 
     SetTexture( "Player", L"Kirby.bmp" );
 

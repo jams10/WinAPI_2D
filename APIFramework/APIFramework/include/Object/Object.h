@@ -103,6 +103,24 @@ public:
 		m_tSize.x = x;
 		m_tSize.y = y;
 	}
+	// pivot
+	POSITION GetPivot() const
+	{
+		return m_tPivot;
+	}
+	void SetPivtot( const POSITION& tPivot )
+	{
+		m_tPivot = tPivot;
+	}
+	void SetPivtot( const POINT& pivot )
+	{
+		m_tPivot = pivot;
+	}
+	void SetPivot( float x, float y )
+	{
+		m_tPivot.x = x;
+		m_tPivot.y = y;
+	}
 	// texture
 	void SetTexture( class CTexture* pTexture );
 	void SetTexture( const string& strKey,

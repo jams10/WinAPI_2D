@@ -8,6 +8,10 @@ private:
 	unordered_map<string, class CTexture*> m_mapTexture;
 	HINSTANCE	m_hInst;
 	HDC			m_hDC;
+	CTexture*   m_pBackBuffer;
+
+public:
+	CTexture* GetBackBuffer() const;
 
 public:
 	bool Init( HINSTANCE hInst, HDC hDC );

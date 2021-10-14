@@ -101,7 +101,6 @@ void CObject::SetTexture( const string& strKey, const wchar_t* pFileName, const 
 {
 	SAFE_RELEASE( m_pTexture );
 	m_pTexture = GET_SINGLE( CResourcesManager )->LoadTexture( strKey, pFileName, strPathKey );
-	int a = 0;
 }
 
 void CObject::Input( float fDeltaTime )
@@ -126,7 +125,7 @@ void CObject::Render( HDC hDC, float fDeltaTime )
 {
 	if( m_pTexture )
 	{
-		BitBlt( hDC, m_tPos.x, m_tPos.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
+		BitBlt( hDC, m_tPos.x - m_tSize.x * 0.5f, m_tPos.y - m_tSize.x * 0.5f, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
 	}
 }
 
