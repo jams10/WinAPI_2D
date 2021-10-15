@@ -86,5 +86,10 @@ void CPlayer::Fire()
 {
     CObject* pBullet = CMoveObject::CreateCloneObj( "Bullet", "PlayerBullet", m_pLayer );
 
-    pBullet->SetPos( m_tPos.x + m_tSize.x, (m_tPos.y + m_tPos.y + m_tSize.y) / 2.f - pBullet->GetSize().y / 2.f );
+    // Get middle point of right
+    POSITION tPos;
+    tPos.x = m_tPos.x + (1.f - m_tPivot.x) * m_tSize.x;
+    tPos.y = m_tPos.y + (0.5f - m_tPivot.y) * m_tSize.y;
+
+    pBullet->SetPos( tPos.x, tPos.y - pBullet->GetSize().y / 2.f );
 }

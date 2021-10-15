@@ -125,7 +125,7 @@ void CObject::Render( HDC hDC, float fDeltaTime )
 {
 	if( m_pTexture )
 	{
-		BitBlt( hDC, m_tPos.x - m_tSize.x * 0.5f, m_tPos.y - m_tSize.x * 0.5f, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
+		BitBlt( hDC, m_tPos.x - m_tSize.x * m_tPivot.x, m_tPos.y - m_tSize.x * m_tPivot.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
 	}
 }
 

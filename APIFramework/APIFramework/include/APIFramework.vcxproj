@@ -153,6 +153,7 @@
     <ClCompile Include="Object\Minion.cpp" />
     <ClCompile Include="Object\MoveObject.cpp" />
     <ClCompile Include="Object\Player.cpp" />
+    <ClCompile Include="Object\Stage.cpp" />
     <ClCompile Include="Object\StaticObject.cpp" />
     <ClCompile Include="Ref.cpp" />
     <ClCompile Include="main.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="Object\Minion.h" />
     <ClInclude Include="Object\MoveObject.h" />
     <ClInclude Include="Object\Player.h" />
+    <ClInclude Include="Object\Stage.h" />
     <ClInclude Include="Object\StaticObject.h" />
     <ClInclude Include="Ref.h" />
     <ClInclude Include="Flag.h" />
