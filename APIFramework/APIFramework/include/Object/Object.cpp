@@ -4,6 +4,7 @@
 #include "../Scene/Scene.h"
 #include "../Resources//ResourcesManager.h"
 #include "../Resources/Texture.h"
+#include "../Core/Camera.h"
 
 list<CObject*> CObject::m_ObjList;
 
@@ -125,7 +126,10 @@ void CObject::Render( HDC hDC, float fDeltaTime )
 {
 	if( m_pTexture )
 	{
-		BitBlt( hDC, m_tPos.x - m_tSize.x * m_tPivot.x, m_tPos.y - m_tSize.x * m_tPivot.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
+		POSITION camPos = GET_SINGLE( CCamera )->GetPos();
+
+		BitBlt( hDC, m_tPos.x - m_tSize.x * m_tPivot.x - camPos.x, 
+			m_tPos.y - m_tSize.x * m_tPivot.y - camPos.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
 	}
 }
 

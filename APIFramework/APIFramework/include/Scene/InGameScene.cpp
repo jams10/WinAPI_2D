@@ -4,6 +4,7 @@
 #include "../Object/Bullet.h"
 #include "../Object/Stage.h"
 #include "Layer.h"
+#include "../Core/Camera.h"
 
 CInGameScene::CInGameScene()
 {
@@ -24,6 +25,9 @@ bool CInGameScene::Init()
     CLayer* pLayer = FindLayer( "Default" );
 
     CPlayer* pPlayer = CObject::CreateObj<CPlayer>( "Player", pLayer );
+
+    GET_SINGLE( CCamera )->SetTarget( pPlayer );
+    GET_SINGLE( CCamera )->SetPivot( 0.8f, 0.3f );
 
     SAFE_RELEASE( pPlayer );
 
