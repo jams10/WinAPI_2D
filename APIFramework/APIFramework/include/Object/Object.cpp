@@ -129,7 +129,7 @@ void CObject::Render( HDC hDC, float fDeltaTime )
 		POSITION camPos = GET_SINGLE( CCamera )->GetPos();
 
 		BitBlt( hDC, m_tPos.x - m_tSize.x * m_tPivot.x - camPos.x, 
-			m_tPos.y - m_tSize.x * m_tPivot.y - camPos.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
+			m_tPos.y - m_tSize.y * m_tPivot.y - camPos.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
 	}
 }
 
