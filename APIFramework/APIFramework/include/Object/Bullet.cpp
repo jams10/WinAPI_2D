@@ -1,4 +1,5 @@
 #include "Bullet.h"
+#include "../Resources/Texture.h"
 
 CBullet::CBullet()
 	:
@@ -22,6 +23,11 @@ CBullet::~CBullet()
 bool CBullet::Init()
 {
 	SetSpeed( 500.f );
+
+	SetPivot( 0.5f, 0.5f );
+	SetTexture( "Bullet", L"Bullet.bmp" );
+
+	m_pTexture->SetColorKey( RGB( 255, 0, 255 ) );
 
 	return true;
 }
@@ -57,7 +63,6 @@ void CBullet::Collision( float fDeltaTime )
 void CBullet::Render( HDC hDC, float fDeltaTime )
 {
 	CMoveObject::Render( hDC, fDeltaTime );
-	Ellipse( hDC, m_tPos.x, m_tPos.y, m_tPos.x + m_tSize.x, m_tPos.y + m_tSize.y );
 }
 
 CBullet* CBullet::Clone()

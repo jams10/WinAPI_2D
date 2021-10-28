@@ -126,10 +126,20 @@ void CObject::Render( HDC hDC, float fDeltaTime )
 {
 	if( m_pTexture )
 	{
+		POSITION tPos = m_tPos - m_tSize * m_tPivot;
 		POSITION camPos = GET_SINGLE( CCamera )->GetPos();
 
-		BitBlt( hDC, m_tPos.x - m_tSize.x * m_tPivot.x - camPos.x, 
-			m_tPos.y - m_tSize.y * m_tPivot.y - camPos.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
+		tPos = tPos - camPos;
+
+		if( m_pTexture->GetColorKeyEnable() )
+		{
+			TransparentBlt( hDC, tPos.x, tPos.y, m_tSize.x, m_tSize.y, 
+				m_pTexture->GetDC(), 0, 0, m_tSize.x, m_tSize.y, m_pTexture->GetColorKey() );
+		}
+		else
+		{
+			BitBlt( hDC, tPos.x, tPos.y, m_tSize.x, m_tSize.y, m_pTexture->GetDC(), 0, 0, SRCCOPY );
+		}
 	}
 }
 

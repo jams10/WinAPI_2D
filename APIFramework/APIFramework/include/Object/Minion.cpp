@@ -23,9 +23,12 @@ CMinion::~CMinion()
 
 bool CMinion::Init()
 {
-	SetPos( 800, 100.f );
+	SetPos( 800.f, 100.f );
 	SetSize( 100.f, 100.f );
 	SetSpeed( 300.f );
+	SetPivot( 0.5f, 0.5f );
+
+	SetTexture( "Minion", L"monster.bmp" );
 
 	m_eDir = MD_FRONT;
 
@@ -77,7 +80,6 @@ void CMinion::Collision( float fDeltaTime )
 void CMinion::Render( HDC hDC, float fDeltaTime )
 {
 	CMoveObject::Render( hDC, fDeltaTime );
-	Rectangle( hDC, m_tPos.x, m_tPos.y, m_tPos.x + m_tSize.x, m_tPos.y + m_tSize.y );
 }
 
 CMinion* CMinion::Clone()
@@ -91,5 +93,8 @@ void CMinion::Fire()
 
 	((CMoveObject*)pBullet)->SetAngle( PI );
 
-	pBullet->SetPos( m_tPos.x - pBullet->GetSize().x, (m_tPos.y + m_tPos.y + m_tSize.y) / 2.f - pBullet->GetSize().y / 2.f );
+	float x = GetLeft() - (pBullet->GetSize().x * (1.f - pBullet->GetPivot().x));
+	float y = GetCenter().y;
+
+	pBullet->SetPos( x, y );
 }

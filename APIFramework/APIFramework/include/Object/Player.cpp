@@ -88,8 +88,8 @@ void CPlayer::Fire()
 
     // Get middle point of right
     POSITION tPos;
-    tPos.x = m_tPos.x + (1.f - m_tPivot.x) * m_tSize.x;
-    tPos.y = m_tPos.y + (0.5f - m_tPivot.y) * m_tSize.y;
+    tPos.x = GetRight() + pBullet->GetSize().x * pBullet->GetPivot().x;
+    tPos.y = GetCenter().y;
 
-    pBullet->SetPos( tPos.x, tPos.y - pBullet->GetSize().y / 2.f );
+    pBullet->SetPos( tPos );
 }
